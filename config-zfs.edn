@@ -1,0 +1,3 @@
+#prune-backups/zfs
+{:rotate {:minutely 288 :hourly 72 :daily 28 :weekly 26 :monthly 24 :yearly 50}
+ :prefixes ["syncthing@snap-"]}

@@ -1,0 +1,56 @@
+{:min-bb-version "1.3.184"
+ :paths ["src"]
+ :tasks
+ {:requires ([babashka.fs :as fs])
+  :init
+  (do
+    (defn print-public-task [k]
+      (let [{:keys [:private :name]} (current-task)]
+        (when-not private
+          (println (case k :enter "☐" "✓") name))))
+
+    (defn touch
+      [path]
+      (if (fs/exists? path)
+        (fs/set-last-modified-time path (System/currentTimeMillis))
+        (fs/create-file path))))
+
+  :enter (print-public-task :enter)
+  :leave (print-public-task :leave)
+
+  -lint-setup
+  {:doc "Setup linter"
+   :task
+   (let [mark-path ".clj-kondo/.cache/mark-lint-deps"]
+     (when (seq (fs/modified-since mark-path "deps.edn"))
+       (shell "bin/clj-kondo-classpath")
+       (touch mark-path)))}
+
+  lint
+  {:doc "Run clj-kondo"
+   :depends [-lint-setup]
+   :task
+   (shell "clj-kondo --lint . deps.edn")}
+
+  ci
+  {:doc "Test and lint"
+   :depends [lint test]}
+
+  upgrade
+  {:doc "Upgrade dependencies"
+   :task (clojure "-M:outdated --upgrade")}
+
+  clean
+  {:doc "Cleanup"
+   :task (doseq [dir [".cpcache" ".clj-kondo/.cache"]]
+           (fs/delete-tree dir))}
+
+  test
+  {:doc "Run tests"
+   :task
+   (clojure "-M:kaocha")}
+
+  build
+  {:doc "Build standalone script and jar"
+   :task
+   (clojure "-T:build uberall")}}}

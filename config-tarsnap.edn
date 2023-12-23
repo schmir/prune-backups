@@ -1,0 +1,4 @@
+#prune-backups/tarsnap
+{:configfile "/home/ralf/tarsnap/puke/tarsnap.conf"
+ :rotate {:daily 28 :weekly 26 :monthly 24 :yearly 50}
+ :prefixes ["git-" "all-"]}
