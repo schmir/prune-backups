@@ -1,7 +1,9 @@
 {:min-bb-version "1.3.184"
+ :deps {io.github.borkdude/gh-release-artifact {:git/sha "4a9a74f0e50e897c45df8cc70684360eb30fce80"}}
  :paths ["src"]
  :tasks
- {:requires ([babashka.fs :as fs])
+ {:requires ([babashka.fs :as fs]
+             [borkdude.gh-release-artifact :as ghr])
   :init
   (do
     (defn print-public-task [k]
@@ -40,11 +42,6 @@
   {:doc "Upgrade dependencies"
    :task (clojure "-M:outdated --upgrade")}
 
-  clean
-  {:doc "Cleanup"
-   :task (doseq [dir [".cpcache" ".clj-kondo/.cache"]]
-           (fs/delete-tree dir))}
-
   test
   {:doc "Run tests"
    :task
@@ -53,4 +50,29 @@
   build
   {:doc "Build standalone script and jar"
    :task
-   (clojure "-T:build uberall")}}}
+   (clojure "-T:build uberall")}
+
+  release
+  {:doc "Upload release"
+   :depends [build]
+   :task
+   (let [version (slurp "target/VERSION")
+         upload (fn [path content-type]
+                  (println "Uploading" path)
+                  (ghr/release-artifact {:org "schmir"
+                                         :repo "prune-backups"
+                                         :tag version
+                                         :draft true
+                                         ;; :commit "8a026a65f2c9f2e3b5413173b9debd075eed7fbb"
+                                         :file path
+                                         :content-type content-type
+                                         :sha256 false
+                                         :overwrite true}))]
+     (upload "target/prune-backups.jar" nil)
+     (upload "target/prune-backups" "text/plain"))}
+
+  clean
+  {:doc "Cleanup"
+   :task (doseq [dir [".cpcache" ".clj-kondo/.cache" "target"]]
+           (fs/delete-tree dir))}
+  }}
