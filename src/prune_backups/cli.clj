@@ -23,8 +23,8 @@
 
 (defn print-help
   []
-  (println "Usage: rotate-backups.clj [options]")
-  (println (cli/format-opts {:spec spec :order [:gen :install-gen :run-ninja :help]}))
+  (println "Usage: prune-backups [options]")
+  (println (cli/format-opts {:spec spec :order [:config :version :help]}))
   (System/exit 0))
 
 (defn find-archives-with-prefix
