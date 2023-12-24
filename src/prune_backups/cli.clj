@@ -1,6 +1,7 @@
 (ns prune-backups.cli
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [prune-backups.meta :as meta]
             [prune-backups.rotate :as rotate]
             [prune-backups.proto :as proto]
             [prune-backups.tarsnap :as tarsnap]
@@ -13,8 +14,9 @@
 
 (def spec
   {:config
-   {:desc "Path to edn config file"
-    :require true}
+   {:desc "Path to edn config file"}
+   :version
+   {:desc "Show version information"}
    :help
    {:desc "Show help message"
     :alias :h}})
@@ -67,9 +69,12 @@
 
 (defn -main [& args]
   (try
-    (let [{:keys [help config]} (cli/parse-opts args
-                                                {:spec spec
-                                                 :restrict (keys spec)})]
+    (let [{:keys [help version config]} (cli/parse-opts args
+                                                        {:spec spec
+                                                         :restrict (keys spec)})]
+      (when version
+        (println meta/version)
+        (System/exit 0))
       (when help
         (print-help))
 
