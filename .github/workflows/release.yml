@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@9.4
+        uses: DeLaGuardo/setup-clojure@12.1
         with:
           bb: latest
           cli: latest
