@@ -1,0 +1,21 @@
+name: release
+on: [push]
+
+permissions: write-all
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@9.4
+        with:
+          bb: latest
+          cli: latest
+      - run: bb release
