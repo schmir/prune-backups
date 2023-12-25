@@ -37,17 +37,18 @@
    (rotate cfg (proto/list-backups (:backup-set cfg))))
   ([cfg all-archives]
    (->> (:prefixes cfg)
-        (map (fn [prefix]
-               (find-archives-with-prefix prefix all-archives)))
-        (mapcat (fn [archives]
-                  (rotate/rotate-backups archives :datetime (:rotate cfg)))))))
+        (mapcat (fn [prefix]
+                  (let [archives (find-archives-with-prefix prefix all-archives)
+                        res (rotate/rotate-backups archives :datetime (:rotate cfg))]
+                    (println (str (pr-str prefix) ": " (count res) " archives, destroying " (count (filter rotate/drop? res))))
+                    res))))))
 
 (defn run
   [bs]
   (println (pr-str bs))
   (let [archives (rotate bs)
         destroy (filter rotate/drop? archives)]
-    (println (count archives) "archives, destroying" (count destroy))
+    ;; (println (count archives) "archives, destroying" (count destroy))
     ;; (pprint/pprint archives)
     (doseq [d destroy]
       (proto/destroy-backup (:backup-set bs) d))))
