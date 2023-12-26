@@ -2,7 +2,9 @@
  :deps {io.github.borkdude/gh-release-artifact {:git/sha "4a9a74f0e50e897c45df8cc70684360eb30fce80"}}
  :paths ["src"]
  :tasks
- {:requires ([babashka.fs :as fs]
+ {:requires ([clojure.string :as str]
+             [babashka.fs :as fs]
+             [babashka.process :as p]
              [borkdude.gh-release-artifact :as ghr])
   :init
   (do
@@ -52,9 +54,29 @@
    :task
    (clojure "-T:build uberall")}
 
+  -smoketest-version
+  {:doc "Test that --version works"
+   :depends []
+   :task
+   (doseq [cmd [["java" "-jar" "./prune-backups.jar"]
+                ["./prune-backups"]]]
+     (let [version (slurp "./target/VERSION")
+           cmd (into cmd ["--version"])
+           version-script (->> (p/process cmd {:out :string :dir "./target"})
+                               p/check
+                               :out)]
+       (println cmd \newline "  --> " (pr-str version-script))
+       (when-not (= version (str/trim version-script))
+         (throw (ex-info "smoketest: wrong version" {:version-script version-script :version version})))))}
+  smoketest
+  {:doc "Test standalone script and jar"
+   :depends [build]
+   :task
+   (run '-smoketest-version)}
+
   release
   {:doc "Upload release"
-   :depends [build]
+   :depends [build smoketest]
    :task
    (let [version (slurp "target/VERSION")
          upload (fn [path content-type]
