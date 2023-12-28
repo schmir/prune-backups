@@ -19,14 +19,20 @@
                  {:archive archive
                   :datetime (parse-local-date datetime)})))))
 
+(defn- tarsnap-process
+  [configfile & params]
+  (let [cmd (if configfile
+              ["tarsnap" "--configfile" configfile]
+              ["tarsnap"])
+        cmd (into cmd params)]
+    (p/check (p/process cmd {:out :string}))))
+
 (defrecord TarsnapBackups [configfile]
   proto/BackupSet
   (list-backups [_]
-    (->> (p/process ["tarsnap" "-v" "--configfile" configfile "--list-archives"]
-                    {:out :string})
-         p/check
+    (->> (tarsnap-process configfile "-v" "--list-archives")
          :out
          parse-list-archive))
   (destroy-backup [_ {:keys [archive]}]
     (println "Destroying" archive)
-    (p/check (p/process ["tarsnap" "--configfile" configfile "-d" "-f" archive]))))
+    (tarsnap-process configfile "-d" "-f" archive)))
