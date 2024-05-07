@@ -1,0 +1,43 @@
+default_language_version:
+  python: python3
+
+repos:
+  - repo: local
+    hooks:
+      - id: zprint
+        name: zprint
+        language: system
+        entry: zprint '{:search-config? true}' -w
+        types: [clojure]
+        exclude: |
+          (?x)(
+             bb\.edn |
+             config-.*.edn
+          )
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: fix-byte-order-marker
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.2
+    hooks:
+      - id: prettier
+        types_or:
+          [
+            "yaml",
+            "markdown",
+            "solidity",
+            "makefile",
+            "gitignore",
+            "toml",
+            "json",
+            "javascript",
+            "proto",
+          ]

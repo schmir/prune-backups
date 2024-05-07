@@ -1,0 +1,19 @@
+;; see https://github.com/kkinnear/zprint/issues/176 and
+;; https://github.com/cohesic/cohesic-xtdb/blob/main/.zprint.edn for some example configurations
+
+{:style   [:community
+           :justified
+           :respect-bl
+           :hiccup
+           :sort-require
+           :minimal-smart-wrap
+           ;;:ns-justify
+           :binding-nl],
+ :comment {:smart-wrap? true},
+ :binding {:justify? true},
+ :map     {:comma? true, :justify? true},
+ :fn-map  {"->"   :none,
+           "->>"  :none,
+           "cond" [:pair-fn {:pair    {:flow? true, :indent 2, :hang? false},
+                             :pair-fn {:hang? false}}]},
+ :width   99}
